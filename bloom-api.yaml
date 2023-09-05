@@ -1,0 +1,157 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Bloom Energy Appstore
+  description: Example API that uses an Appstore 
+  termsOfService: http://swagger.io/terms/
+  contact:
+    name: Swagger API Team
+    email: apiteam@swagger.io
+    url: http://swagger.io
+  license:
+    name: Proprietary
+    url: https://www.bloomenergy.com/licenses/LICENSE.html
+servers:
+  - url: http://localhost:8080/v1
+paths:
+  /Apps:
+    get:
+      description: |
+        Returns all Apps from the system that the user has access to
+        Write more documentation here
+        And here!
+      operationId: findApps
+      parameters:
+        - name: tags
+          in: query
+          description: tags to filter by
+          required: false
+          style: form
+          schema:
+            type: array
+            items:
+              type: string
+        - name: limit
+          in: query
+          description: maximum number of results to return
+          required: false
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: App response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/App'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      description: Creates a new App in the store. Duplicates are allowed
+      operationId: addApp
+      requestBody:
+        description: App to add to the store
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewApp'
+      responses:
+        '200':
+          description: App response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/App'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /Apps/{appId}:
+    get:
+      description: Returns a user based on a single ID, if the user does not have access to the App
+      operationId: find App by id
+      parameters:
+        - name: appId
+          in: path
+          description: ID of App to fetch
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: App response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/App'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      description: deletes a single App based on the ID supplied
+      operationId: deleteApp
+      parameters:
+        - name: appId
+          in: path
+          description: ID of App to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: App deleted
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+components:
+  schemas:
+    App:
+      allOf:
+        - $ref: '#/components/schemas/NewApp'
+        - type: object
+          required:
+          - appId
+          properties:
+            appId:
+              type: integer
+              format: int64
+
+    NewApp:
+      type: object
+      required:
+        - name  
+      properties:
+        name:
+          type: string
+        tag:
+          type: string    
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
